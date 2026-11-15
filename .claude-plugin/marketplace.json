@@ -1,0 +1,6 @@
+{
+  "name": "dugujun-mods",
+  "description": "独孤菌做的 Claude Code 小玩意",
+  "owner": { "name": "独孤菌" },
+  "plugins": [{ "name": "niang-pet", "source": "./" }]
+}
