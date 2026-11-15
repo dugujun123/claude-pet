@@ -16,8 +16,30 @@ const PANE = {
 
 const SURFACES = ['terminal', 'desktop', 'vscode', 'mobile'] as const
 
+const RUN = {
+  command: 'niang-pet:niang',
+  args: '',
+  origin: { kind: 'composer' },
+  presentation: { isFullscreen: false, columns: 80 },
+} as const
+
+test('/niang 由钩子直接回话，不走 skill 正文', async ($, on) => {
+  on('ui.open', () => ({ value: { isPlaced: true } }))
+
+  const { text } = await $.command.run(RUN)
+  expect(text).toBe('Claude 娘来了。')
+})
+
+test('开面板出错时也由钩子回话', async ($, on) => {
+  on('ui.open', () => {
+    throw new Error('boom')
+  })
+
+  const { text } = await $.command.run(RUN)
+  expect(text).toBe('Claude 娘这次没出来，再输一次 /niang 试试。')
+})
+
 test('三个状态在四个端都画得出来', async ($, on) => {
-  on('command.register', () => ({ value: { command: 'niang' } }))
   on('ui.open', () => ({ value: { isPlaced: true } }))
   on('session.start', (_, e) => ({ cwd: e.cwd }))
   on('turn.start', (_, e) => ({ turnId: e.turnId }))
@@ -41,7 +63,7 @@ test('三个状态在四个端都画得出来', async ($, on) => {
     await ui.unmount()
   }
 
-  await $.turn.complete({ text: 'ok', turnId: 't1', reason: 'answer' })
+  await $.turn.complete({ answer: 'ok', durationMs: 0, isAborted: false, turnId: 't1', reason: 'answer' })
 
   for (const surface of SURFACES) {
     const ui = await $.ui.mount({ ...PANE, surface })

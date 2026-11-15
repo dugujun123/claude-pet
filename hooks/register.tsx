@@ -6,6 +6,9 @@ import { SVG_BODY, SVG_PX, TERM, TERM_CELLS } from './frames'
 
 const PANE = 'niang-pet'
 const TITLE = 'Claude 娘'
+// /niang 声明在 skills/niang：桌面客户端读命令清单的临时进程不跑钩子，只认得出 skill 自带的短名别名。
+// command.run 不调 next 直接回话，skill 正文只在钩子没运行时才会发给模型。
+const COMMAND = 'niang-pet:niang'
 // 做完之后保持「做完」表情多久再回到空闲
 const REST_MS = 8000
 
@@ -37,21 +40,17 @@ export const register: Register = on => {
 
   const open = { id: PANE, title: TITLE, columns: TERM.columns + 2, rows: TERM.rows + 2 }
 
-  on('session.start', async ($, e, next) => {
-    await $.command.register({
-      name: 'niang',
-      description: '把 Claude 娘叫出来',
-    })
+  on('session.start', ($, e, next) => {
     void $.ui.open(open)
 
     return next(e)
   })
 
-  on('command.run', { command: 'niang' }, async $ => {
+  on('command.run', { command: COMMAND }, async $ => {
     const opened = await $.ui.open(open)
 
     return { text: opened.isPlaced ? 'Claude 娘来了。' : `Claude 娘还没法出来：${opened.reason}` }
-  })
+  }).catch(($, e, next) => (next.called ? next(e) : { text: 'Claude 娘这次没出来，再输一次 /niang 试试。' }))
 
   on('turn.start', async ($, e, next) => {
     if (e.agentId === undefined) {
