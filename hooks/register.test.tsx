@@ -71,3 +71,29 @@ test('三个状态在四个端都画得出来', async ($, on) => {
     await ui.unmount()
   }
 })
+
+test('/niang deepseek 手动换肤，/niang auto 按模型名自动选', async ($, on) => {
+  on('ui.open', () => ({ value: { isPlaced: true } }))
+  on('session.model', () => ({ value: 'claude-opus-5-5' }))
+
+  expect((await $.command.run({ ...RUN, args: 'deepseek' })).text).toBe('DeepSeek 娘来了。')
+  const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect((await ui.find({ type: 'Text' }))?.text).toBe('等你开口 · DeepSeek')
+  await ui.unmount()
+
+  // 终端帧不换肤，文字也不加后缀
+  const term = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect((await term.find({ type: 'Text' }))?.text).toBe('等你开口')
+  await term.unmount()
+
+  expect((await $.command.run({ ...RUN, args: 'auto' })).text).toBe('换回自动了，现在是Claude 娘。')
+  expect((await $.command.run({ ...RUN, args: 'xyz' })).text).toBe('只认得 /niang、/niang deepseek、/niang claude、/niang auto。')
+})
+
+test('后端模型名带 deepseek 时自动变 DeepSeek 娘', async ($, on) => {
+  on('ui.open', () => ({ value: { isPlaced: true } }))
+  on('session.model', () => ({ value: 'deepseek-v4-pro' }))
+
+  expect((await $.command.run(RUN)).text).toBe('DeepSeek 娘来了。')
+  expect((await $.command.run({ ...RUN, args: 'claude' })).text).toBe('Claude 娘来了。')
+})

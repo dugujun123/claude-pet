@@ -34,6 +34,16 @@ Claude 桌面客户端里 `/plugin` 用不了：点输入框旁边的 +，选 Pl
 
 回合被打断或者出错时，她直接回到空闲。子 Agent 干活不会让她切表情，她只跟主对话。
 
+### DeepSeek 娘
+
+客户端底层接的是 DeepSeek 时，她会变成 DeepSeek 娘：头发、发饰和衣服照旧，眼睛变蓝，多出一对鲸鳍耳和一条鲸鱼尾巴，图下面那行字后面会加上「· DeepSeek」。
+
+- `/niang deepseek`：手动切成 DeepSeek 娘
+- `/niang claude`：手动切回 Claude 娘
+- `/niang auto`：自动模式（默认），`/model` 显示的模型名里带 deepseek 就自动切
+
+手动指定的优先于自动识别。如果你用的转发工具把 DeepSeek 的模型名改成了 claude 开头的名字，自动识别认不出来，用 `/niang deepseek` 手动切就行。换皮肤只换桌面端的全身像，终端的半身像不变。
+
 ## 各端的情况
 
 - Claude 桌面客户端：显示全身像素画，已实测。
@@ -45,6 +55,12 @@ Claude 桌面客户端里 `/plugin` 用不了：点输入框旁边的 +，选 Pl
 
 ```
 python3 tools/build_frames.py <图片目录> hooks/frames.ts
+```
+
+DeepSeek 娘的三张图用另一个脚本生成，它只产出桌面端的帧：
+
+```
+python3 tools/build_skin.py <图片目录> hooks/frames_deepseek.ts SVG_BODY_DEEPSEEK
 ```
 
 需要 Python 3 和 Pillow。
